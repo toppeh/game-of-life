@@ -3,10 +3,170 @@
 <head>
     <meta charset="utf-8">
     <title>Game of Life</title>
-    <script src="game.js" type="module"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+<script type="text/javascript">
+    //Create a Pixi Application
+    let app = new PIXI.Application({
+        width: 800,
+        height: 600,
+        backgroundColor: 0x66CC1F
+    });
+    document.body.appendChild(app.view);
 
+    const cellWidth = 20;
+    const dead = 0xFFFFFF;
+    const alive = 0x000000;
+    const ms = 500;
+    let interval;
 
+    // cells is for storing the current state of the gameboard
+    // newColours is for storing the next state of the gameboard 
+    let cells = [];
+    let newColours = [];
+    let newGame = true;
+
+    createClickableCells();
+
+    // Process the game by one step.
+    function gameTick(delta){
+        newColours = [];
+        let rows = cells.length;
+        for (let y = 0; y < rows; y++){
+            let cols = cells[y].length;
+            let arr = [];
+            for (let x = 0; x < cols; x++){
+                // Go through the cell's 8 neighbours and count the alive ones
+                let neighboursAlive = 0;
+                if (y != 0 && x != 0) {
+                    if (cells[y-1][x-1] == alive){neighboursAlive++;}
+                }
+                if (y != 0) {
+                    if (cells[y-1][x] == alive){neighboursAlive++;}
+                }
+                if (y != 0 && x != cols-1) {
+                    if (cells[y-1][x+1] == alive){neighboursAlive++;}
+                }
+                if (x != 0) {
+                    if (cells[y][x-1] == alive){neighboursAlive++;}
+                }
+                if (x != cols-1) {
+                    if (cells[y][x+1] == alive){neighboursAlive++;}
+                }
+                if (y != rows-1 && x != 0) {
+                    if (cells[y+1][x-1] == alive){neighboursAlive++;}
+                }
+                if (y != rows-1) {
+                    if (cells[y+1][x] == alive){neighboursAlive++;}
+                }
+                if (y != rows-1 && x != cols-1) {
+                    if (cells[y+1][x+1] == alive){neighboursAlive++;}
+                }
+                // Game of life rules that decide if a cell will live or die
+                if (neighboursAlive == 3 && cells[y][x] == dead){
+                    arr.push(alive);
+                } else if (neighboursAlive >= 2 && neighboursAlive <= 3 && cells[y][x] == alive){
+                    arr.push(alive);
+                } else {
+                    arr.push(dead);
+                }
+            }
+            newColours.push(arr);
+        }
+        updateCellColours();
+    }
+
+    // Fill the board area with interactive cell's
+    function createClickableCells(){
+        app.stage.removeChildren();
+        cells = [];
+        console.log("width:", app.view.width, "height: ", app.view.height)
+        for (let y = 0; y < app.view.height/cellWidth; y++) {
+            let arr = [];
+            for (let x = 0; x < app.view.width/cellWidth; x++){
+                let rectangle = new PIXI.Graphics();
+                rectangle.beginFill(dead);
+                rectangle.drawRect(x*cellWidth, y*cellWidth, cellWidth, cellWidth).endFill();
+                rectangle.position.set(x*cellWidth, y*cellWidth)
+                rectangle.interactive = true;
+                app.stage.addChild(rectangle);
+                arr.push(dead);
+            }
+            cells.push(arr);
+        }
+        // Add a listener to each cell here as it cannot be done on cell creation
+        app.stage.children.forEach(cell => {
+            cell.on("click", function(event){
+                newcolor = switchColours(event.currentTarget.geometry.points); 
+                if (newcolor == alive){
+                    event.currentTarget.beginFill(alive);
+                } else {
+                    event.currentTarget.beginFill(dead);
+                }
+                event.currentTarget.drawRect(event.currentTarget.x,
+                                            event.currentTarget.y,
+                                            cellWidth, cellWidth).endFill();
+            });
+            
+        });
+        console.log("Uusi/reset lauta neliömäärä: ", app.stage.children.length);
+    }
+
+    // Update (i.e. detroy and recreate) a cell's colour after a game tick
+    function updateCellColours(){
+        app.stage.removeChildren();
+        cells = [];
+        for (let y = 0; y < newColours.length; y++) {
+            let arr = [];
+            for (let x = 0; x < newColours[y].length; x++){
+                let rectangle = new PIXI.Graphics();
+                if (newColours[y][x] == alive) {
+                    rectangle.beginFill(alive);
+                    arr.push(alive);
+                } else {
+                    rectangle.beginFill(dead);
+                    arr.push(dead);
+                }
+                rectangle.drawRect(x*cellWidth, y*cellWidth, cellWidth, cellWidth).endFill();             
+                app.stage.addChild(rectangle);
+            }
+            cells.push(arr);
+        }
+    }
+
+    // Switch cell's colour after user input
+    function switchColours(points){
+        let x = points["0"]/cellWidth;
+        let y = points["1"]/cellWidth;
+        if (cells[y][x] == alive){
+            cells[y][x] = dead;
+            return dead;
+        } else {
+            cells[y][x] = alive;
+            return alive;
+        }
+    }
+
+    function reset(){
+        clearInterval(interval);
+        document.querySelector("#startBtn").disabled = false;
+        document.querySelector("#resetBtn").disabled = true;
+        createClickableCells();
+    }
+
+    function start(){
+        document.querySelector("#startBtn").disabled = true;
+        document.querySelector("#resetBtn").disabled = false;
+        interval = setInterval(gameTick, ms);
+    }
+
+</script>
+<div>
+<button id="startBtn" onclick="start()">Start</button>
+<button id="resetBtn" onclick="reset()" disabled>Reset</button>
+</div>
 </body>
 </html>
