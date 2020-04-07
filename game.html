@@ -9,7 +9,6 @@
 
 <body>
 <script type="text/javascript">
-    //Create a Pixi Application
     let app = new PIXI.Application({
         width: 800,
         height: 600,
@@ -23,8 +22,10 @@
     const ms = 500;
     let interval;
 
-    // cells is for storing the current state of the gameboard
-    // newColours is for storing the next state of the gameboard 
+    // cells is for storing the current state of the gameboard.
+    // newColours is for storing the next state of the gameboard
+    // Both are used as an array holding arrays of hex values with an inside array
+    // representing a row of cells on the gameboard. 
     let cells = [];
     let newColours = [];
     let newGame = true;
