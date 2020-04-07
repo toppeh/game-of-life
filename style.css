@@ -6,9 +6,16 @@ canvas {
     border-style: solid
   }
 
-  button {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-  }
+button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+#middle {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}

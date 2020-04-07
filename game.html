@@ -8,6 +8,7 @@
 </head>
 
 <body>
+    <div id="middle">Klikkaa kehyksen sisällä valitaksesi elävät solut peliä varten.</div>
 <script type="text/javascript">
     let app = new PIXI.Application({
         width: 800,
@@ -43,33 +44,33 @@
                 // Go through the cell's 8 neighbours and count the alive ones
                 let neighboursAlive = 0;
                 if (y != 0 && x != 0) {
-                    if (cells[y-1][x-1] == alive){neighboursAlive++;}
+                    if (cells[y-1][x-1] === alive){neighboursAlive++;}
                 }
                 if (y != 0) {
-                    if (cells[y-1][x] == alive){neighboursAlive++;}
+                    if (cells[y-1][x] === alive){neighboursAlive++;}
                 }
                 if (y != 0 && x != cols-1) {
-                    if (cells[y-1][x+1] == alive){neighboursAlive++;}
+                    if (cells[y-1][x+1] === alive){neighboursAlive++;}
                 }
                 if (x != 0) {
-                    if (cells[y][x-1] == alive){neighboursAlive++;}
+                    if (cells[y][x-1] === alive){neighboursAlive++;}
                 }
                 if (x != cols-1) {
-                    if (cells[y][x+1] == alive){neighboursAlive++;}
+                    if (cells[y][x+1] === alive){neighboursAlive++;}
                 }
                 if (y != rows-1 && x != 0) {
-                    if (cells[y+1][x-1] == alive){neighboursAlive++;}
+                    if (cells[y+1][x-1] === alive){neighboursAlive++;}
                 }
                 if (y != rows-1) {
-                    if (cells[y+1][x] == alive){neighboursAlive++;}
+                    if (cells[y+1][x] === alive){neighboursAlive++;}
                 }
                 if (y != rows-1 && x != cols-1) {
-                    if (cells[y+1][x+1] == alive){neighboursAlive++;}
+                    if (cells[y+1][x+1] === alive){neighboursAlive++;}
                 }
                 // Game of life rules that decide if a cell will live or die
-                if (neighboursAlive == 3 && cells[y][x] == dead){
+                if (neighboursAlive === 3 && cells[y][x] === dead){
                     arr.push(alive);
-                } else if (neighboursAlive >= 2 && neighboursAlive <= 3 && cells[y][x] == alive){
+                } else if (neighboursAlive >= 2 && neighboursAlive <= 3 && cells[y][x] === alive){
                     arr.push(alive);
                 } else {
                     arr.push(dead);
@@ -85,16 +86,17 @@
         app.stage.removeChildren();
         cells = [];
         console.log("width:", app.view.width, "height: ", app.view.height)
-        for (let y = 0; y < app.view.height/cellWidth; y++) {
+        for (let y = 0; y < app.view.height; y += cellWidth) {
             let arr = [];
-            for (let x = 0; x < app.view.width/cellWidth; x++){
+            for (let x = 0; x < app.view.width; x += cellWidth){
                 let rectangle = new PIXI.Graphics();
                 rectangle.beginFill(dead);
-                rectangle.drawRect(x*cellWidth, y*cellWidth, cellWidth, cellWidth).endFill();
-                rectangle.position.set(x*cellWidth, y*cellWidth)
+                rectangle.drawRect(x, y, cellWidth, cellWidth).endFill();
+                //rectangle.setTransform(x,y)
                 rectangle.interactive = true;
                 app.stage.addChild(rectangle);
                 arr.push(dead);
+                //console.log(rectangle.transform)
             }
             cells.push(arr);
         }
@@ -102,17 +104,19 @@
         app.stage.children.forEach(cell => {
             cell.on("click", function(event){
                 newcolor = switchColours(event.currentTarget.geometry.points); 
-                if (newcolor == alive){
+                if (newcolor === alive){
                     event.currentTarget.beginFill(alive);
                 } else {
                     event.currentTarget.beginFill(dead);
                 }
-                event.currentTarget.drawRect(event.currentTarget.x,
-                                            event.currentTarget.y,
+                event.currentTarget.drawRect(event.currentTarget.geometry.points["0"],
+                                            event.currentTarget.geometry.points["1"],
                                             cellWidth, cellWidth).endFill();
             });
             
         });
+        console.log(app.stage.children[0].transform);
+        console.log(app.stage.children[1].transform);
         console.log("Uusi/reset lauta neliömäärä: ", app.stage.children.length);
     }
 
@@ -124,7 +128,7 @@
             let arr = [];
             for (let x = 0; x < newColours[y].length; x++){
                 let rectangle = new PIXI.Graphics();
-                if (newColours[y][x] == alive) {
+                if (newColours[y][x] === alive) {
                     rectangle.beginFill(alive);
                     arr.push(alive);
                 } else {
@@ -140,9 +144,11 @@
 
     // Switch cell's colour after user input
     function switchColours(points){
+        console.log(points)
         let x = points["0"]/cellWidth;
         let y = points["1"]/cellWidth;
-        if (cells[y][x] == alive){
+        console.log("yx:", y, x)
+        if (cells[y][x] === alive){
             cells[y][x] = dead;
             return dead;
         } else {
