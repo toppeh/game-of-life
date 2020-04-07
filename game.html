@@ -17,7 +17,7 @@
     });
     document.body.appendChild(app.view);
 
-    const cellWidth = 20;
+    const cellWidth = 10;
     const dead = 0xFFFFFF;
     const alive = 0x000000;
     const ms = 500;
@@ -92,17 +92,15 @@
                 let rectangle = new PIXI.Graphics();
                 rectangle.beginFill(dead);
                 rectangle.drawRect(x, y, cellWidth, cellWidth).endFill();
-                //rectangle.setTransform(x,y)
                 rectangle.interactive = true;
                 app.stage.addChild(rectangle);
                 arr.push(dead);
-                //console.log(rectangle.transform)
             }
             cells.push(arr);
         }
         // Add a listener to each cell here as it cannot be done on cell creation
         app.stage.children.forEach(cell => {
-            cell.on("click", function(event){
+            cell.on("mousedown", function(event){
                 newcolor = switchColours(event.currentTarget.geometry.points); 
                 if (newcolor === alive){
                     event.currentTarget.beginFill(alive);
